@@ -99,7 +99,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             snprintf(buffer, sizeof(buffer), "Mouse LEFT DOWN at %d, %d", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             LogMessage("WM_LBUTTONDOWN", buffer);
         } break;
-
         case WM_LBUTTONUP: {
             snprintf(buffer, sizeof(buffer), "Mouse LEFT UP at %d, %d", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             LogMessage("WM_LBUTTONUP", buffer);
