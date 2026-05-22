@@ -64,6 +64,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 TRACKMOUSEEVENT tme = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, hWnd, 0 };
                 TrackMouseEvent(&tme);
             }
+            if (wParam & MK_LBUTTON) {
+                snprintf(buffer, sizeof(buffer), "Mouse DRAGGING at %d, %d", GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+                LogMessage("WM_MOUSEMOVE", buffer);
+            }
         } break;
         case WM_MOUSELEAVE: {
             is_mouse_entered = false;
@@ -75,10 +79,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             if (GetTouchInputInfo((HTOUCHINPUT)lParam, cInputs, pInputs, sizeof(TOUCHINPUT))) {
                 for (UINT i = 0; i < cInputs; i++) {
                     if (pInputs[i].dwFlags & TOUCHEVENTF_DOWN) {
-                        snprintf(buffer, sizeof(buffer),
-                            "Touch DOWN at %d, %d on %d",
-                            pInputs[i].x / 100, pInputs[i].y / 100, hWnd
-                        );
+                        snprintf(buffer, sizeof(buffer), "Touch DOWN at %d, %d", pInputs[i].x / 100, pInputs[i].y / 100);
+                        LogMessage("WM_TOUCH", buffer);
+                    }
+                    else if (pInputs[i].dwFlags & TOUCHEVENTF_MOVE) {
+                        snprintf(buffer, sizeof(buffer), "Touch MOVE at %d, %d", pInputs[i].x / 100, pInputs[i].y / 100);
+                        LogMessage("WM_TOUCH", buffer);
+                    }
+                    else if (pInputs[i].dwFlags & TOUCHEVENTF_UP) {
+                        snprintf(buffer, sizeof(buffer), "Touch UP at %d, %d", pInputs[i].x / 100, pInputs[i].y / 100);
                         LogMessage("WM_TOUCH", buffer);
                     }
                 }
@@ -117,6 +126,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = "win32_test_class";
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     RegisterClass(&wc);
 
     HWND hWnd = CreateWindow(
