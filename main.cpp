@@ -10,7 +10,8 @@ void LogMessage(const char * msg_str, const char * info = "") {
     auto now = std::chrono::system_clock::now();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
     auto timer = std::chrono::system_clock::to_time_t(now);
-    std::tm bt = *std::localtime(&timer);
+    std::tm bt;
+    localtime_s(&bt, &timer);
     printf(
         "[%02d:%02d:%02d.%03lld, %s] %s\n", 
         bt.tm_hour, bt.tm_min, bt.tm_sec, ms.count(),
@@ -58,10 +59,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
             LogMessage("WM_ACTIVATE");
         } break;
         case WM_MOUSEMOVE: {
+            LogMessage("WM_MOUSEMOVE");
             if (!is_mouse_entered) {
                 LogMessage("WM_MOUSEMOVE", "Mouse Entered Window");
                 is_mouse_entered = true;
-                TRACKMOUSEEVENT tme = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, hWnd, 0 };
+                TRACKMOUSEEVENT tme = {
+                    sizeof(TRACKMOUSEEVENT),
+                    TME_LEAVE,
+                    hWnd,
+                    HOVER_DEFAULT
+                };
                 TrackMouseEvent(&tme);
             }
             if (wParam & MK_LBUTTON) {
